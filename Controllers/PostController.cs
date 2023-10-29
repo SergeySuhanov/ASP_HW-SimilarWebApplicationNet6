@@ -12,19 +12,31 @@ namespace ASP_HW_SimilarWebApplicationNet6.Controllers
 			this.blogDbContext = blogDbContext;
 		}
 
-		[HttpGet]
+        [HttpGet]
+        public IActionResult Index()
+        {
+			var posts = blogDbContext.Posts;
+            return View(posts);
+        }
+
+        [HttpGet]
 		public IActionResult Add()
 		{
 			return View();
 		}
 
 		[HttpPost]
-		public IActionResult Add(Post post)
+		public async Task<IActionResult> Add(Post post)
 		{
-			post.Date = DateTime.Now;
-			blogDbContext.Posts.Add(post);
-			blogDbContext.SaveChanges();
-			return RedirectToAction("Add");
+			if (ModelState.IsValid)
+			{
+				TempData["status"] = "New Post added!";
+                post.Date = DateTime.Now;
+                await blogDbContext.Posts.AddAsync(post);
+                await blogDbContext.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+			return View(post);
 		}
 	}
 }
